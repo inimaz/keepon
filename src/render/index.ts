@@ -42,11 +42,11 @@ class Render {
     const { status, description, title } = item;
     const priority = item.priority;
 
-    if (status !== TaskStatus.Completed && priority > 1) {
+    if (status !== TaskStatus.Done && priority > 1) {
       message.push(underline["yellow"](title));
       message.push(priority < 2 ? yellow("(!)") : red("(!!)"));
     } else {
-      message.push(status === TaskStatus.Completed ? grey(title) : title);
+      message.push(status === TaskStatus.Done ? grey(title) : title);
     }
     message.push(grey(truncateString(description)));
 
@@ -82,7 +82,7 @@ class Render {
 
       const msgObj = { prefix, message, suffix };
 
-      return item.status === TaskStatus.Completed
+      return item.status === TaskStatus.Done
         ? success(msgObj)
         : item.status === TaskStatus.InProgress
         ? wait(msgObj)

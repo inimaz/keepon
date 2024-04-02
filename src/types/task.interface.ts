@@ -16,7 +16,7 @@ export interface ITask {
 export enum TaskStatus {
   Pending = "pending",
   InProgress = "in-progress",
-  Completed = "completed",
+  Done = "done",
 }
 
 export interface ICreateTask {
