@@ -8,8 +8,25 @@ Track your tasks and improve your time management with a simple cli.
 npm install -g .
 ```
 
+# Usage
+
+See all commands with `k -h`
+
+```sh
+$ k -h
+
+Options:
+  -h, --help                                                           display help for command
+
+Commands:
+  show                                                                 Show all tasks
+  create <title> [description] [urgency] [importance] [estimatedTime]  Create a new task
+  update [options] <id>                                                Update a task
+  help [command]                                                       display help for command
 ```
-k
+
+```sh
+$ k
   _                    ___
  | | _____  ___ _ __  / _ \ _ __
  | |/ / _ \/ _ \ '_ \| | | | '_ \

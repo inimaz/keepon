@@ -3,6 +3,7 @@
 import figlet from "figlet";
 import TaskCommands from "./tasks/taskCommands.class.js";
 import * as commander from "commander";
+import { IUpdateTask } from "task.interface.js";
 const program = new commander.Command();
 
 const taskCommands = new TaskCommands();
@@ -42,29 +43,30 @@ program
       estimatedTime: parseInt(estimatedTime),
     });
   });
-// program
-//   .command("update")
-//   .description("Update a task")
-//   .argument("id", "id of the task to update")
-//   .option("-t, --title", "title of the task")
-//   .option("-d, --description", "description of the task")
-//   .option("-u, --urgency", "how urgent this task is(0-10)")
-//   .option("-i, --importance", "how important this task is(0-10)")
-//   .option(
-//     "-et --estimatedTime",
-//     "how much time will it take to accomplish it (in min)"
-//   )
-//   .action(async (...args) => {
-//     console.log(args);
-//     const [id, title, description, urgency, importance, estimatedTime] = args;
-//     await taskCommands.setUpConfig();
-//     await taskCommands.updateTask(id, {
-//       title,
-//       description,
-//       urgency,
-//       importance,
-//       estimatedTime,
-//     });
-//   });
+program
+  .command("update")
+  .description("Update a task")
+  .argument("id", "id of the task to update")
+  .option("-t, --title <string>", "title of the task")
+  .option("-d, --description <string>", "description of the task")
+  .option("-u, --urgency <int>", "how urgent this task is(0-10)")
+  .option("-i, --importance <int>", "how important this task is(0-10)")
+  .option(
+    "-et --estimatedTime <int>",
+    "how much time will it take to accomplish it (in min)"
+  )
+  .action(async (id, options) => {
+    const { title, description, urgency, importance, estimatedTime } = options;
+    let taskData: IUpdateTask = {};
+    if (title !== undefined) taskData.title = title;
+    if (description !== undefined) taskData.description = description;
+    if (urgency !== undefined) taskData.urgency = parseInt(urgency);
+    if (importance !== undefined) taskData.importance = parseInt(importance);
+    if (estimatedTime !== undefined)
+      taskData.estimatedTime = parseInt(estimatedTime);
+
+    await taskCommands.setUpConfig();
+    await taskCommands.updateTask(id, taskData);
+  });
 
 program.parse(process.argv);

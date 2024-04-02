@@ -74,7 +74,7 @@ export class TaskApi {
     // Recalculate priority
     task = { ...task, priority: calculatePriority(task) };
     // Update the task
-    tasks[tasks.findIndex((task) => task.id === id)] = task;
+    tasks[tasks.findIndex((task: ITask) => task._id === id)] = task;
     await this.db.write();
     return task;
   }
