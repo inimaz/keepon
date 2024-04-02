@@ -68,5 +68,23 @@ program
     await taskCommands.setUpConfig();
     await taskCommands.updateTask(id, taskData);
   });
+program
+  .command("start")
+  .description("Start a task")
+  .argument("id", "id of the task to start")
+  .action(async (...args) => {
+    const [id] = args;
+    await taskCommands.setUpConfig();
+    await taskCommands.setStatusInProgress(id);
+  });
+program
+  .command("check")
+  .description("Check/uncheck task")
+  .argument("id", "id of the task to check")
+  .action(async (...args) => {
+    const [id] = args;
+    await taskCommands.setUpConfig();
+    await taskCommands.checkStatus(id);
+  });
 
 program.parse(process.argv);

@@ -14,6 +14,7 @@ See all commands with `k -h`
 
 ```sh
 $ k -h
+Usage: k [options] [command]
 
 Options:
   -h, --help                                                           display help for command
@@ -22,6 +23,8 @@ Commands:
   show                                                                 Show all tasks
   create <title> [description] [urgency] [importance] [estimatedTime]  Create a new task
   update [options] <id>                                                Update a task
+  start <id>                                                           Start a task
+  check <id>                                                           Check/uncheck task
   help [command]                                                       display help for command
 ```
 

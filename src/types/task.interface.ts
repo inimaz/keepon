@@ -37,4 +37,5 @@ export interface IUpdateTask {
   labels?: string[];
   dueDate?: Date;
   completed?: boolean;
+  status?: TaskStatus;
 }

@@ -1,6 +1,11 @@
 import { TaskApi } from "./taskApi.class.js";
 import createDb from "../db.js";
-import { ICreateTask, IUpdateTask } from "task.interface.js";
+import {
+  ICreateTask,
+  ITask,
+  IUpdateTask,
+  TaskStatus,
+} from "../types/task.interface.js";
 import render from "../render/index.js";
 import fs from "fs";
 import os from "os";
@@ -30,41 +35,43 @@ export default class TaskCommands {
 
     // Render the response
     render.displayTaskDashboard(tasks);
-    // console.log("Dashboard");
-    // console.log(chalk.bgBlue(JSON.stringify(tasks, null, 2)));
   }
   async createTask(task: ICreateTask): Promise<void> {
-    // const task: ICreateTask = {
-    //   title: "First task",
-    //   description: "This is the first task",
-    //   estimatedTime: 45,
-    //   importance: 1,
-    //   urgency: 10,
-    // };
     const taskCreated = await this.taskAPi.create(task);
 
     render.successCreate(taskCreated._id);
-    // console.log("Task created");
-    // console.log(chalk.green(JSON.stringify(taskCreated, null, 2)));
   }
-  async getTask(): Promise<void> {
-    const id = "1";
+  async getTask(id: string): Promise<void> {
     const task = await this.taskAPi.get(id);
 
     render.successGet(task);
-    // console.log(`Retrieved task ${id}`);
-    // console.log(chalk.yellow(JSON.stringify(task, null, 2)));
   }
   async updateTask(id: string, data: IUpdateTask): Promise<void> {
-    // const id = "1";
-    // const task = await this.taskAPi.update(id, {
-    //   estimatedTime: 32,
-    //   importance: 10,
-    // });
     const task = await this.taskAPi.update(id, data);
 
     render.successEdit(task._id);
-    // console.log(`Updated task ${id}`);
-    // console.log(chalk.gray(JSON.stringify(task, null, 2)));
+  }
+  async setStatusInProgress(id: string) {
+    const task = await this.taskAPi.update(id, {
+      status: TaskStatus.InProgress,
+    });
+    render.successEdit(task._id);
+  }
+  /**
+   *
+   * @param id
+   */
+  async checkStatus(id: string) {
+    const originaltask: ITask = await this.taskAPi.get(id);
+    let status;
+    if (originaltask.status === TaskStatus.Done) {
+      status = TaskStatus.Pending;
+    } else {
+      status = TaskStatus.Done;
+    }
+    const task = await this.taskAPi.update(id, {
+      status,
+    });
+    render.successEdit(task._id);
   }
 }
