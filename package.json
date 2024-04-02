@@ -1,0 +1,29 @@
+{
+  "name": "tasks-cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "npx tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "inimaz <93inigo93@gmail.com> (https://github.com/inimaz)",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/figlet": "^1.5.8",
+    "@types/node": "^20.12.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.3"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^12.0.0",
+    "figlet": "^1.7.0",
+    "lowdb": "^7.0.1",
+    "mongoose": "^8.2.4",
+    "signale": "^1.4.0"
+  },
+  "types": "lib/"
+}
