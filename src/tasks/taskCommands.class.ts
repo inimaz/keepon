@@ -12,6 +12,7 @@ import os from "os";
 import path from "path";
 
 export default class TaskCommands {
+  archivedb: any;
   db: any;
   taskAPi: TaskApi;
   constructor() {}
@@ -26,6 +27,8 @@ export default class TaskCommands {
     });
     // Create the db
     this.db = await createDb(path.join(dirPath, "tasks.json"));
+    // Create the archive db
+    this.archivedb = await createDb(path.join(dirPath, "archive.tasks.json"));
     this.taskAPi = new TaskApi(this.db);
   }
 
@@ -73,5 +76,23 @@ export default class TaskCommands {
       status,
     });
     render.successEdit(task._id);
+  }
+  /**
+   * Archive all tasks that have been completed
+   */
+  async clearCompletedTasks() {
+    // Get all tasks
+    const tasks = await this.taskAPi.getAll();
+    tasks.data.forEach(async (task: ITask) => {
+      if (task.status === TaskStatus.Done) {
+        this.archivedb.data.tasks.push(task);
+        this.db.data.tasks.splice(
+          this.db.data.tasks.findIndex((t: ITask) => t._id === task._id),
+          1
+        );
+      }
+    });
+    await this.db.write();
+    await this.archivedb.write();
   }
 }

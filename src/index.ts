@@ -86,5 +86,13 @@ program
     await taskCommands.setUpConfig();
     await taskCommands.checkStatus(id);
   });
+program
+  .command("clear")
+  .description("Clear all completed tasks")
+  .action(async (...args) => {
+    const [id] = args;
+    await taskCommands.setUpConfig();
+    await taskCommands.clearCompletedTasks();
+  });
 
 program.parse(process.argv);

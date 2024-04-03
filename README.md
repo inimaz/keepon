@@ -25,6 +25,7 @@ Commands:
   update [options] <id>                                                Update a task
   start <id>                                                           Start a task
   check <id>                                                           Check/uncheck task
+  clear                                                                clear all completed tasks
   help [command]                                                       display help for command
 ```
 
