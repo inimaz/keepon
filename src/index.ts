@@ -20,6 +20,24 @@ program
 function welcome() {
   console.log(figlet.textSync("keepOn"));
 }
+
+program
+  .command("check")
+  .description("Check/uncheck task")
+  .argument("id", "id of the task to check")
+  .action(async (...args) => {
+    const [id] = args;
+    await taskCommands.setUpConfig();
+    await taskCommands.checkStatus(id);
+  });
+program
+  .command("clear")
+  .description("Clear all completed tasks")
+  .action(async (...args) => {
+    const [id] = args;
+    await taskCommands.setUpConfig();
+    await taskCommands.clearCompletedTasks();
+  });
 program
   .command("create")
   .description("Create a new task")
@@ -42,6 +60,25 @@ program
       importance: parseInt(importance),
       estimatedTime: parseInt(estimatedTime),
     });
+  });
+program
+  .command("get")
+  .description("Get all info of a task")
+  .argument("id", "id of the task")
+  .action(async (...args) => {
+    const [id] = args;
+    await taskCommands.setUpConfig();
+    await taskCommands.getTask(id);
+  });
+
+program
+  .command("start")
+  .description("Start a task")
+  .argument("id", "id of the task to start")
+  .action(async (...args) => {
+    const [id] = args;
+    await taskCommands.setUpConfig();
+    await taskCommands.setStatusInProgress(id);
   });
 program
   .command("update")
@@ -67,32 +104,6 @@ program
 
     await taskCommands.setUpConfig();
     await taskCommands.updateTask(id, taskData);
-  });
-program
-  .command("start")
-  .description("Start a task")
-  .argument("id", "id of the task to start")
-  .action(async (...args) => {
-    const [id] = args;
-    await taskCommands.setUpConfig();
-    await taskCommands.setStatusInProgress(id);
-  });
-program
-  .command("check")
-  .description("Check/uncheck task")
-  .argument("id", "id of the task to check")
-  .action(async (...args) => {
-    const [id] = args;
-    await taskCommands.setUpConfig();
-    await taskCommands.checkStatus(id);
-  });
-program
-  .command("clear")
-  .description("Clear all completed tasks")
-  .action(async (...args) => {
-    const [id] = args;
-    await taskCommands.setUpConfig();
-    await taskCommands.clearCompletedTasks();
   });
 
 program.parse(process.argv);

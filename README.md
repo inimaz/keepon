@@ -21,11 +21,12 @@ Options:
 
 Commands:
   show                                                                 Show all tasks
-  create <title> [description] [urgency] [importance] [estimatedTime]  Create a new task
-  update [options] <id>                                                Update a task
-  start <id>                                                           Start a task
   check <id>                                                           Check/uncheck task
-  clear                                                                clear all completed tasks
+  clear                                                                Clear all completed tasks
+  create <title> [description] [urgency] [importance] [estimatedTime]  Create a new task
+  get <id>                                                             Get all info of a task
+  start <id>                                                           Start a task
+  update [options] <id>                                                Update a task
   help [command]                                                       display help for command
 ```
 
