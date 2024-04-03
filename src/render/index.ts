@@ -8,7 +8,7 @@ const { await: wait, error, log, note, pending, success } = signale;
 const { blue, green, grey, magenta, red, underline, yellow } = chalk;
 
 function truncateString(str) {
-  const numberOfChars = 30;
+  const numberOfChars = 50;
   if (str.length > numberOfChars) {
     return str.substring(0, numberOfChars) + "...";
   } else {
@@ -46,7 +46,7 @@ class Render {
       message.push(underline["yellow"](title));
       message.push(priority < 2 ? yellow("(!)") : red("(!!)"));
     } else {
-      message.push(status === TaskStatus.Done ? grey(title) : title);
+      message.push(status === TaskStatus.Done ? grey(`${title} //`) : title);
     }
     message.push(grey(truncateString(description)));
 
@@ -58,6 +58,9 @@ class Render {
       Math.abs((birthday.getTime() - Date.now()) / daytime)
     );
     return age === 0 ? "" : grey(`${age}d`);
+  }
+  _getEstimatedTime(estimatedTime: number) {
+    return blue(`⌛${estimatedTime}min`);
   }
 
   displayTaskDashboard({
@@ -75,10 +78,12 @@ class Render {
     // The items of the dashboard
     data.forEach((item) => {
       const age = this._getAge(new Date(item.createdAt));
+      const estimatedTime = this._getEstimatedTime(item.estimatedTime);
 
       const prefix = this._buildPrefix(item);
       const message = this._buildMessage(item);
-      const suffix = age.length === 0 ? "" : `${age}`;
+      const suffix =
+        age.length === 0 ? `${estimatedTime}` : `${estimatedTime} ${age}`;
 
       const msgObj = { prefix, message, suffix };
 
