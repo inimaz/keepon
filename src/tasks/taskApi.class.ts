@@ -50,9 +50,12 @@ export class TaskApi {
   async create(data: ICreateTask): Promise<ITask> {
     const tasks = await this.db.data.tasks;
     const now = new Date();
+    const id = `${
+      this.db.data.lastTaskId !== undefined ? this.db.data.lastTaskId + 1 : 1
+    }`;
     const task: ITask = {
       ...data,
-      _id: `${tasks.length + 1}`,
+      _id: id,
       priority: calculatePriority(data),
       createdAt: now,
       updatedAt: now,
@@ -60,6 +63,7 @@ export class TaskApi {
       labels: data.labels || [],
     };
     tasks.push(task);
+    this.db.data.lastTaskId = parseInt(id);
     await this.db.write();
     return task;
   }
