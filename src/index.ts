@@ -22,6 +22,16 @@ function welcome() {
 }
 
 program
+  .command("block")
+  .description("Set the status of a task to blocked")
+  .argument("id", "id of the task that is blocked")
+  .action(async (...args) => {
+    const [id] = args;
+    await taskCommands.setUpConfig();
+    await taskCommands.setStatusBlocked(id);
+  });
+
+program
   .command("check")
   .description("Check/uncheck task")
   .argument("id", "id of the task to check")
@@ -30,6 +40,7 @@ program
     await taskCommands.setUpConfig();
     await taskCommands.checkStatus(id);
   });
+
 program
   .command("clear")
   .description("Clear all completed tasks")

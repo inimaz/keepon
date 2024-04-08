@@ -60,6 +60,12 @@ export default class TaskCommands {
     });
     render.successEdit(task._id);
   }
+  async setStatusBlocked(id: string) {
+    const task = await this.taskAPi.update(id, {
+      status: TaskStatus.Blocked,
+    });
+    render.successEdit(task._id);
+  }
   /**
    *
    * @param id

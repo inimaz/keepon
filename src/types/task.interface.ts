@@ -16,6 +16,7 @@ export interface ITask {
 export enum TaskStatus {
   Pending = "pending",
   InProgress = "in-progress",
+  Blocked = "blocked",
   Done = "done",
 }
 

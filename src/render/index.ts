@@ -41,12 +41,19 @@ class Render {
 
     const { status, description, title } = item;
     const priority = item.priority;
+    if (status === TaskStatus.Blocked) {
+      message.push(red("🚫"));
+    }
 
-    if (status !== TaskStatus.Done && priority > 1) {
+    if (
+      ![TaskStatus.Done, TaskStatus.Blocked].includes(status) &&
+      priority > 1
+    ) {
       message.push(underline["yellow"](title));
       message.push(priority < 2 ? yellow("(!)") : red("(!!)"));
     } else {
-      message.push(status === TaskStatus.Done ? grey(`${title} //`) : title);
+      const messageTitle = status === TaskStatus.Done ? grey(title) : title;
+      message.push(messageTitle);
     }
     message.push(grey(truncateString(description)));
 
@@ -91,6 +98,8 @@ class Render {
         ? success(msgObj)
         : item.status === TaskStatus.InProgress
         ? wait(msgObj)
+        : item.status === TaskStatus.Blocked
+        ? note(msgObj)
         : pending(msgObj);
     });
     // The footer of the dashboard

@@ -21,6 +21,7 @@ Options:
 
 Commands:
   show                                                                 Show all tasks
+  block <id>                                                           Set the status of a task to blocked
   check <id>                                                           Check/uncheck task
   clear                                                                Clear all completed tasks
   create <title> [description] [urgency] [importance] [estimatedTime]  Create a new task
