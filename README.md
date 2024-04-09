@@ -20,7 +20,7 @@ Options:
   -h, --help                                                           display help for command
 
 Commands:
-  show                                                                 Show all tasks
+  show [options]                                                       Show all tasks
   block <id>                                                           Set the status of a task to blocked
   check <id>                                                           Check/uncheck task
   clear                                                                Clear all completed tasks
@@ -30,6 +30,8 @@ Commands:
   update [options] <id>                                                Update a task
   help [command]                                                       display help for command
 ```
+
+If no command is passed, by default it will show the dashboard (`k show` command).
 
 ```sh
 $ k

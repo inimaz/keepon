@@ -20,9 +20,12 @@ export class TaskApi {
     const tasks = await this.db.data.tasks;
     return this._getById(tasks, id);
   }
-  async getAll(
-    params?: IParams
-  ): Promise<{ data: ITask[]; total: number; limit: number; offset: number }> {
+  async getAll(params?: IParams): Promise<{
+    data: ITask[];
+    total: number;
+    limit: number;
+    offset: number;
+  }> {
     params = {
       limit: 10,
       offset: 0,
@@ -31,7 +34,11 @@ export class TaskApi {
       ...params,
     };
 
-    const tasks: ITask[] = await this.db.data.tasks;
+    let tasks: ITask[] = await this.db.data.tasks;
+
+    if (params.hideBlockedTasks) {
+      tasks = tasks.filter((task) => task.status !== TaskStatus.Blocked);
+    }
     // Apply sorting
     tasks.sort((a, b) => {
       return params.order === "asc"

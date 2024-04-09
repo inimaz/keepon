@@ -32,9 +32,9 @@ export default class TaskCommands {
     this.taskAPi = new TaskApi(this.db);
   }
 
-  async showTasksDashboard(): Promise<void> {
+  async showTasksDashboard(hideBlockedTasks: boolean = false): Promise<void> {
     // Get all tasks
-    const tasks = await this.taskAPi.getAll();
+    const tasks = await this.taskAPi.getAll({ hideBlockedTasks });
 
     // Render the response
     render.displayTaskDashboard(tasks);

@@ -11,10 +11,12 @@ const taskCommands = new TaskCommands();
 program
   .command("show", { isDefault: true })
   .description("Show all tasks")
-  .action(async () => {
+  .option("-b, --hideBlock", "hide blocked tasks")
+  .action(async (options) => {
     welcome();
+    const { hideBlock } = options;
     await taskCommands.setUpConfig();
-    await taskCommands.showTasksDashboard();
+    await taskCommands.showTasksDashboard(hideBlock);
   });
 
 function welcome() {
