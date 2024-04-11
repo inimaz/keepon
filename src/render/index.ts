@@ -52,7 +52,8 @@ class Render {
       message.push(underline["yellow"](title));
       message.push(priority < 2 ? yellow("(!)") : red("(!!)"));
     } else {
-      const messageTitle = status === TaskStatus.Done ? grey(title) : title;
+      const messageTitle =
+        status === TaskStatus.Done ? grey(`${title} //`) : title;
       message.push(messageTitle);
     }
     message.push(grey(truncateString(description)));

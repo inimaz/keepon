@@ -12,6 +12,8 @@ export interface ITask {
   dueDate?: Date;
   createdAt: Date;
   updatedAt: Date;
+  startedAt?: Date; // Date when it was set to in progress
+  completedAt?: Date; // Date when it was set to done
 }
 export enum TaskStatus {
   Pending = "pending",

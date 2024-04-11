@@ -75,12 +75,20 @@ export class TaskApi {
     return task;
   }
   async update(id: string, data: IUpdateTask): Promise<ITask> {
+    const currentDate = new Date();
     const tasks = await this.db.data.tasks;
     let task = this._getById(tasks, id);
+    // Set startedAt amd completedAt dates
+    if (data.status === TaskStatus.InProgress) {
+      task = { ...task, startedAt: currentDate };
+    } else if (data.status === TaskStatus.Done) {
+      task = { ...task, completedAt: currentDate };
+    }
+    // Update the task object
     task = {
       ...task,
       ...data,
-      updatedAt: new Date(),
+      updatedAt: currentDate,
     };
     // Recalculate priority
     task = { ...task, priority: calculatePriority(task) };
