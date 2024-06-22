@@ -101,4 +101,17 @@ export default class TaskCommands {
     await this.db.write();
     await this.archivedb.write();
   }
+
+  /**
+   * Show the agenda dashboard
+   */
+  async showAgendaDashboard(): Promise<void> {
+    // Get all tasks
+    const tasks = await this.taskAPi.getAll({
+      hideBlockedTasks: true,
+    });
+
+    // Render the response
+    render.displayAgendaDashboard(tasks.data);
+  }
 }

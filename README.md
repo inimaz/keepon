@@ -28,6 +28,7 @@ Commands:
   get <id>                                                             Get all info of a task
   start <id>                                                           Start a task
   update [options] <id>                                                Update a task
+  agenda|a                                                             Show the agenda of today as if you had to do all the tasks today
   help [command]                                                       display help for command
 ```
 
@@ -53,4 +54,12 @@ $ k
     4. ☐  Start unit tests Needed to keep quality over ti...
 
 7 of 7 tasks. Offset: 0
+```
+
+# How the priority is calculated
+
+The priority gives the order in the dashboard. It is calculated based on the urgency, the estimated time and importance of the task. The formula is:
+
+```
+priority = urgency * importance / estimatedTime
 ```
