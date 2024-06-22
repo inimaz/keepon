@@ -106,6 +106,59 @@ class Render {
     // The footer of the dashboard
     log(grey(`\n${data.length} of ${total} tasks. Offset: ${offset}`));
   }
+  displayAgendaDashboard(tasks: ITask[]) {
+    // Show a line with the day of the week + day of the month
+
+    const date = new Date();
+    const day = date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+    log(underline(day));
+
+    const now = date.getTime();
+
+    // Show a column with the time of the day separated by 15 min
+    const SLOT_DURATION = 15; // min
+    const time = new Date(date);
+    time.setHours(0, 0, 0, 0);
+    time.setMinutes(Math.ceil(time.getMinutes() / 30) * 30);
+    const timeSlots: string[] = [];
+    while (time.getDate() === date.getDate()) {
+      const timeString = time.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: false,
+      });
+
+      const prefix = " ".repeat(6 - timeString.length);
+      const message = timeString;
+
+      if (time.getTime() > now) {
+        timeSlots.push(prefix + message);
+      }
+
+      time.setMinutes(time.getMinutes() + SLOT_DURATION);
+    }
+
+    const agendaRows: { prefix: string; message: string; suffix: string }[] =
+      [];
+    // For each task, create an agendaRow showing when it will be started
+    tasks.forEach((task) => {
+      const prefix = timeSlots.shift();
+      if (!prefix) return;
+      // Remove as many slots as the estimated time - 1
+      const slots = Math.ceil(task.estimatedTime / SLOT_DURATION) - 1;
+      timeSlots.splice(0, slots);
+      const message = task.title;
+      const suffix = this._getEstimatedTime(task.estimatedTime);
+
+      const msgObj = { prefix, message, suffix };
+      agendaRows.push(msgObj);
+    });
+    agendaRows.forEach((row) => log(row));
+  }
   successCreate(id) {
     const [prefix, suffix] = ["\n", grey(id)];
     const message = "Created task:";

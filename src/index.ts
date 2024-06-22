@@ -119,4 +119,15 @@ program
     await taskCommands.updateTask(id, taskData);
   });
 
+program
+  .command("agenda")
+  .alias("a")
+  .description(
+    "Show the agenda of today as if you had to do all the tasks today"
+  )
+  .action(async () => {
+    await taskCommands.setUpConfig();
+    await taskCommands.showAgendaDashboard();
+  });
+
 program.parse(process.argv);
