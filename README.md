@@ -1,35 +1,17 @@
-![KeepOn](./docs/keepOn-logo.png)
+![KeepOn](./docs/media/keepOn-logo.png)
 
 # keepOn
 
 _Track your tasks and improve your time management with a simple cli._
 
-```sh
-$ k
-  _                    ___
- | | _____  ___ _ __  / _ \ _ __
- | |/ / _ \/ _ \ '_ \| | | | '_ \
- |   <  __/  __/ |_) | |_| | | | |
- |_|\_\___|\___| .__/ \___/|_| |_|
-               |_|
-
-  Dashboard
-
-    2. ✔  Add repo to git
-    1. ✔  Return ring to Mordor
-    3. ✔  Call car insurance
-    7. ☐  Start task (!) Update a task to in progress w...
-    5. ☐  Decide what to do with holidays
-    6. ☐  Clear done tasks Archive all the tasks that are...
-    4. ☐  Write an essay about life. Needed to keep on...
-
-7 of 7 tasks. Offset: 0
-```
+![alt text](./docs/media/image.png)
 
 # How it works
 
 1. Add your tasks with the urgency, importance and estimated time in minutes
 1. `keepOn` will prioritize those tasks base on your inputs and tell you which task to do next
+
+   ![alt text](./docs/media/keepOn-createTask.gif)
 
 # Install
 
@@ -62,6 +44,7 @@ Commands:
 ```
 
 If no command is passed, by default it will show the dashboard (`k show` command).
+![alt text](./docs/media/keepOn-show.gif)
 
 # How the priority is calculated
 
