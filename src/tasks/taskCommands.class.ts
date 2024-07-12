@@ -33,8 +33,12 @@ export default class TaskCommands {
   }
 
   async showTasksDashboard(hideBlockedTasks: boolean = false): Promise<void> {
+    let query = {};
+    if (hideBlockedTasks) {
+      query = { statusExcludeFilter: [TaskStatus.Blocked] };
+    }
     // Get all tasks
-    const tasks = await this.taskAPi.getAll({ hideBlockedTasks });
+    const tasks = await this.taskAPi.getAll(query);
 
     // Render the response
     render.displayTaskDashboard(tasks);
@@ -108,7 +112,7 @@ export default class TaskCommands {
   async showAgendaDashboard(): Promise<void> {
     // Get all tasks
     const tasks = await this.taskAPi.getAll({
-      hideBlockedTasks: true,
+      statusExcludeFilter: [TaskStatus.Blocked, TaskStatus.Done],
     });
 
     // Render the response

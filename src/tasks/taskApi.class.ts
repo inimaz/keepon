@@ -39,6 +39,11 @@ export class TaskApi {
     if (params.hideBlockedTasks) {
       tasks = tasks.filter((task) => task.status !== TaskStatus.Blocked);
     }
+    if (params.statusExcludeFilter) {
+      tasks = tasks.filter(
+        (task) => !params.statusExcludeFilter.includes(task.status)
+      );
+    }
     // Apply sorting
     tasks.sort((a, b) => {
       return params.order === "asc"
