@@ -1,8 +1,11 @@
 {
-  "name": "tasks-cli",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@inimaz/keepon",
+  "version": "0.1.1",
+  "description": "Track your tasks and improve your time management with a simple cli.",
   "main": "./lib/index.js",
+  "repository": {
+    "url": "https://github.com/inimaz/keepon"
+  },
   "type": "module",
   "bin": {
     "k": "./lib/index.js"
@@ -11,9 +14,12 @@
     "build": "npx tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "inimaz <93inigo93@gmail.com> (https://github.com/inimaz)",
-  "license": "ISC",
+  "keywords": [
+    "time-management",
+    "productivity"
+  ],
+  "author": "inimaz (https://github.com/inimaz)",
+  "license": "MIT",
   "devDependencies": {
     "@types/figlet": "^1.5.8",
     "@types/node": "^20.12.2",

@@ -1,17 +1,17 @@
-![KeepOn](./docs/media/keepOn-logo.png)
+![KeepOn](https://raw.githubusercontent.com/inimaz/keepon/main/docs/media/keepOn-logo.png)
 
 # keepOn
 
 _Track your tasks and improve your time management with a simple cli._
 
-![alt text](./docs/media/image.png)
+![alt text](https://raw.githubusercontent.com/inimaz/keepon/main/docs/media/image.png)
 
 # How it works
 
 1. Add your tasks with the urgency, importance and estimated time in minutes
 1. `keepOn` will prioritize those tasks base on your inputs and tell you which task to do next
 
-   ![alt text](./docs/media/keepOn-createTask.gif)
+   ![alt text](https://raw.githubusercontent.com/inimaz/keepon/main/docs/media/keepOn-createTask.gif)
 
 # Install
 
@@ -44,7 +44,7 @@ Commands:
 ```
 
 If no command is passed, by default it will show the dashboard (`k show` command).
-![alt text](./docs/media/keepOn-show.gif)
+![alt text](https://raw.githubusercontent.com/inimaz/keepon/main/docs/media/keepOn-show.gif)
 
 # How the priority is calculated
 
