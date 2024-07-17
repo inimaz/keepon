@@ -16,7 +16,7 @@ _Track your tasks and improve your time management with a simple cli._
 # Install
 
 ```
-npm install -g .
+npm install -g @inimaz/keepon
 ```
 
 # Usage
