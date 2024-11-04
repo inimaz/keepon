@@ -130,4 +130,12 @@ program
     await taskCommands.showAgendaDashboard();
   });
 
+program
+  .command("reindex")
+  .description("Reindex tasks so that their IDs go from 1 to N")
+  .action(async () => {
+    await taskCommands.setUpConfig();
+    await taskCommands.reindexTasks();
+  });
+
 program.parse(process.argv);

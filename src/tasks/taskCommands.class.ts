@@ -105,6 +105,19 @@ export default class TaskCommands {
     await this.db.write();
     await this.archivedb.write();
   }
+  /**
+   * Reindex tasks so that their IDs go from 1 to N
+   */
+  async reindexTasks() {
+    // Get all tasks
+    const tasks = await this.taskAPi.getAll();
+    let newId = 1;
+    tasks.data.forEach(async (task: ITask) => {
+      task._id = `${newId}`;
+      newId += 1;
+    });
+    await this.db.write();
+  }
 
   /**
    * Show the agenda dashboard
