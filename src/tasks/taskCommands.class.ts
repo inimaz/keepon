@@ -116,6 +116,8 @@ export default class TaskCommands {
       task._id = `${newId}`;
       newId += 1;
     });
+    // Update the lastTaskId so new tasks use lastTaskId +1 ...
+    this.db.data.lastTaskId = newId;
     await this.db.write();
   }
 
