@@ -133,4 +133,8 @@ export default class TaskCommands {
     // Render the response
     render.displayAgendaDashboard(tasks.data);
   }
+  async deleteTask(id: string): Promise<void> {
+    await this.taskAPi.delete(id);
+    render.successDelete(id);
+  }
 }

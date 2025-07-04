@@ -120,6 +120,16 @@ program
   });
 
 program
+  .command("delete")
+  .description("Delete a task")
+  .argument("id", "id of the task to delete")
+  .action(async (...args) => {
+    const [id] = args;
+    await taskCommands.setUpConfig();
+    await taskCommands.deleteTask(id);
+  });
+
+program
   .command("agenda")
   .alias("a")
   .description(

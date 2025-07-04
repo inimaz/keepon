@@ -103,7 +103,13 @@ export class TaskApi {
     return task;
   }
   async delete(id: string): Promise<void> {
-    throw new Error("Method not implemented");
+    const tasks = await this.db.data.tasks;
+    const index = tasks.findIndex((task: ITask) => task._id === id);
+    if (index === -1) {
+      throw new Error("Task not found");
+    }
+    tasks.splice(index, 1);
+    await this.db.write();
   }
 }
 
