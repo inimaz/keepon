@@ -1,6 +1,6 @@
 {
   "name": "@inimaz/keepon",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Track your tasks and improve your time management with a simple cli.",
   "main": "./lib/index.js",
   "repository": {
