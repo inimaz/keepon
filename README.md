@@ -39,6 +39,7 @@ Commands:
   get <id>                                                             Get all info of a task
   start <id>                                                           Start a task
   update [options] <id>                                                Update a task
+  delete <id>                                                          Delete a task
   agenda|a                                                             Show the agenda of today as if you had to do all the tasks today
   reindex                                                              Reindex tasks so that their IDs go from 1 to N
   help [command]                                                       display help for command
