@@ -176,6 +176,12 @@ class Render {
     log({ prefix, message, suffix });
     log(grey(JSON.stringify(task, null, 4)));
   }
+
+  successDelete(id: string) {
+    const [prefix, suffix] = ["\n", grey(id)];
+    const message = "Deleted item:";
+    success({ prefix, message, suffix });
+  }
 }
 
 export default new Render();
