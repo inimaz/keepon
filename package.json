@@ -12,7 +12,8 @@
   },
   "scripts": {
     "build": "npx tsc",
-    "test": "npx vitest run"
+    "test": "npx vitest run",
+    "test:coverage": "npx vitest run --coverage  --coverage.include \"src/**/*.ts\""
   },
   "keywords": [
     "time-management",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@types/figlet": "^1.5.8",
     "@types/node": "^20.12.2",
+    "@vitest/coverage-v8": "^4.1.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3",
     "vitest": "^4.1.4"
