@@ -51,20 +51,32 @@ program
     await taskCommands.setUpConfig();
     await taskCommands.clearCompletedTasks();
   });
+
 program
   .command("create")
   .description("Create a new task")
   .argument("title", "title of the task")
   .argument("[description]", "description of the task", "")
-  .argument("[urgency]", "how urgent this task is(0-10)", 5)
-  .argument("[importance]", "how important this task is(0-10)", 5)
+  .argument("[urgency]", "how urgent this task is(0-10)", "5")
+  .argument("[importance]", "how important this task is(0-10)", "5")
   .argument(
     "[estimatedTime]",
     "how much time will it take to accomplish it (in min)",
-    5
+    "5"
   )
-  .action(async (...args) => {
-    const [title, description, urgency, importance, estimatedTime] = args;
+  .option("-d, --description <string>", "description of the task")
+  .option("-u, --urgency <int>", "how urgent this task is(0-10)")
+  .option("-i, --importance <int>", "how important this task is(0-10)")
+  .option("-et, --estimatedTime <int>", "how much time will it take to accomplish it (in min)")
+  .action(async (args, options) => {
+    // Positional arguments take precedence over options if both are provided
+    const [title, posDescription, posUrgency, posImportance, posEstimatedTime] = args;
+    
+    const description = options.description ?? posDescription;
+    const urgency = options.urgency ?? posUrgency;
+    const importance = options.importance ?? posImportance;
+    const estimatedTime = options.estimatedTime ?? posEstimatedTime;
+
     await taskCommands.setUpConfig();
     await taskCommands.createTask({
       title,
