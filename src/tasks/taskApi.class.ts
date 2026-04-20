@@ -118,7 +118,7 @@ export class TaskApi {
  * @param task
  * @returns
  */
-const calculatePriority = (task: ICreateTask): number => {
+export const calculatePriority = (task: ICreateTask): number => {
   if (!task.estimatedTime) throw new Error("Task must have an estimated time");
   if (!task.importance) throw new Error("Task must have an importance");
   if (!task.urgency) throw new Error("Task must have an urgency");
