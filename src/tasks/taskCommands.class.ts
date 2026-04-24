@@ -61,6 +61,7 @@ export default class TaskCommands {
   async setStatusInProgress(id: string) {
     const task = await this.taskAPi.update(id, {
       status: TaskStatus.InProgress,
+      startedAt: new Date(),
     });
     render.successEdit(task._id);
   }

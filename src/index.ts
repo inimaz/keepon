@@ -68,24 +68,25 @@ program
   .option("-u, --urgency <int>", "how urgent this task is(0-10)")
   .option("-i, --importance <int>", "how important this task is(0-10)")
   .option("-et, --estimatedTime <int>", "how much time will it take to accomplish it (in min)")
-  .action(async (args, options) => {
-    // Positional arguments take precedence over options if both are provided
-    const [title, posDescription, posUrgency, posImportance, posEstimatedTime] = args;
-    
-    const description = options.description ?? posDescription;
-    const urgency = options.urgency ?? posUrgency;
-    const importance = options.importance ?? posImportance;
-    const estimatedTime = options.estimatedTime ?? posEstimatedTime;
-
-    await taskCommands.setUpConfig();
-    await taskCommands.createTask({
-      title,
-      description,
-      urgency: parseInt(urgency),
-      importance: parseInt(importance),
-      estimatedTime: parseInt(estimatedTime),
-    });
-  });
+  .action(
+    async (
+      title: string,
+      description: string,
+      urgency: string,
+      importance: string,
+      estimatedTime: string,
+      options
+    ) => {
+      await taskCommands.setUpConfig();
+      await taskCommands.createTask({
+        title,
+        description: options.description ?? description,
+        urgency: parseInt(options.urgency ?? urgency, 10),
+        importance: parseInt(options.importance ?? importance, 10),
+        estimatedTime: parseInt(options.estimatedTime ?? estimatedTime, 10),
+      });
+    }
+  );
 program
   .command("get")
   .description("Get all info of a task")

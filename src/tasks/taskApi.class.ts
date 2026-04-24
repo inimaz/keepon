@@ -73,6 +73,7 @@ export class TaskApi {
       updatedAt: now,
       status: TaskStatus.Pending,
       labels: data.labels || [],
+      timeSpent: 0,
     };
     tasks.push(task);
     this.db.data.lastTaskId = parseInt(id);
@@ -83,22 +84,45 @@ export class TaskApi {
     const currentDate = new Date();
     const tasks = await this.db.data.tasks;
     let task = this._getById(tasks, id);
-    // Set startedAt amd completedAt dates
-    if (data.status === TaskStatus.InProgress) {
-      task = { ...task, startedAt: currentDate };
-    } else if (data.status === TaskStatus.Done) {
-      task = { ...task, completedAt: currentDate };
+    const oldStatus = task.status;
+    const newStatus = data.status;
+
+    // Initialize timeSpent if it doesn't exist (for older tasks)
+    if (task.timeSpent === undefined) task.timeSpent = 0;
+
+    // Handle status transitions for time tracking
+    if (newStatus !== undefined && newStatus !== oldStatus) {
+      if (newStatus === TaskStatus.InProgress) {
+        task.startedAt = currentDate;
+        task.lastStartedAt = currentDate;
+      } else {
+        // Moving away from InProgress (to Done, Blocked, or Pending)
+        if (oldStatus === TaskStatus.InProgress && task.lastStartedAt) {
+          const duration = currentDate.getTime() - task.lastStartedAt.getTime();
+          task.timeSpent += duration;
+          task.lastStartedAt = undefined;
+        }
+
+        if (newStatus === TaskStatus.Done) {
+          task.completedAt = currentDate;
+        }
+      }
     }
-    // Update the task object
+
+    // Update the task object with provided data
     task = {
       ...task,
       ...data,
       updatedAt: currentDate,
     };
     // Recalculate priority
-    task = { ...task, priority: calculatePriority(task) };
-    // Update the task
-    tasks[tasks.findIndex((task: ITask) => task._id === id)] = task;
+    task = { ...task, priority: calculatePriority(task as any) };
+    // Update the task in the array
+    const index = tasks.findIndex((t: ITask) => t._id === id);
+    if (index !== -1) {
+      tasks[index] = task;
+    }
+    
     await this.db.write();
     return task;
   }

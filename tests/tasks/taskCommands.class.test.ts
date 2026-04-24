@@ -45,6 +45,40 @@ describe('TaskCommands', () => {
       expect(mockTaskApi.create).toHaveBeenCalledWith(taskData);
       expect(render.successCreate).toHaveBeenCalledWith('1');
     });
+    describe('createTask with CLI positional arguments', () => {
+      it('should correctly parse positional args from k create "test" "" 5 10 45', async () => {
+        const createdTask = { _id: '1', title: 'test', estimatedTime: 45, urgency: 5, importance: 10 };
+        mockTaskApi.create.mockResolvedValue(createdTask);
+
+        // Simulate current CLI handler receiving args from commander
+        const [title, posDescription, posUrgency, posImportance, posEstimatedTime] =
+          ['test', '', '5', '10', '45'];
+
+        const urgency = parseInt(posUrgency, 10);
+        const importance = parseInt(posImportance, 10);
+        const estimatedTime = parseInt(posEstimatedTime, 10);
+
+        await taskCommands.createTask({
+          title,
+          description: posDescription,
+          urgency,
+          importance,
+          estimatedTime,
+        });
+
+        expect(estimatedTime).toBe(45);
+        expect(urgency).toBe(5);
+        expect(importance).toBe(10);
+        expect(mockTaskApi.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'test',
+            estimatedTime: 45,
+            urgency: 5,
+            importance: 10,
+          })
+        );
+      });
+    });
   });
 
   describe('getTask', () => {
@@ -81,6 +115,7 @@ describe('TaskCommands', () => {
 
       expect(mockTaskApi.update).toHaveBeenCalledWith('1', {
         status: TaskStatus.InProgress,
+        startedAt: expect.any(Date),
       });
       expect(render.successEdit).toHaveBeenCalledWith('1');
     });

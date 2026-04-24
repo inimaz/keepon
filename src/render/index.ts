@@ -70,7 +70,30 @@ class Render {
   _getEstimatedTime(estimatedTime: number) {
     return blue(`⌛${estimatedTime}min`);
   }
+  _getDuration(timeSpent: number, lastStartedAt?: Date, completedAt?: Date): string {
+    const parts = [];
+    
+    // Handle accumulated timeSpent
+    if (timeSpent > 0) {
+      const hours = Math.floor(timeSpent / (1000 * 60 * 60));
+      const minutes = Math.floor((timeSpent % (1000 * 60 * 60)) / (1000 * 60));
+      const timeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+      parts.push(`(Spent:${timeStr})`);
+    }
 
+    // Handle current active session
+    if (lastStartedAt) {
+      const end = completedAt ? new Date(completedAt) : new Date();
+      const diffMs = end.getTime() - new Date(lastStartedAt).getTime();
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      if (diffMins > 0) {
+        parts.push(`(Active:${diffMins}m)`);
+      }
+    }
+
+    return parts.length > 0 ? grey(parts.join(' ')) : "";
+  }
+  
   displayTaskDashboard({
     data,
     total,
@@ -87,14 +110,14 @@ class Render {
     data.forEach((item) => {
       const age = this._getAge(new Date(item.createdAt));
       const estimatedTime = this._getEstimatedTime(item.estimatedTime);
+      const duration = this._getDuration(item.timeSpent, item.lastStartedAt, item.completedAt);
 
       const prefix = this._buildPrefix(item);
       const message = this._buildMessage(item);
-      const suffix =
-        age.length === 0 ? `${estimatedTime}` : `${estimatedTime} ${age}`;
+      const suffix = [estimatedTime, age, duration].filter(Boolean).join(' ');
 
       const msgObj = { prefix, message, suffix };
-
+      
       return item.status === TaskStatus.Done
         ? success(msgObj)
         : item.status === TaskStatus.InProgress
@@ -108,7 +131,7 @@ class Render {
   }
   displayAgendaDashboard(tasks: ITask[]) {
     // Show a line with the day of the week + day of the month
-
+    
     const date = new Date();
     const day = date.toLocaleDateString("en-US", {
       weekday: "long",
