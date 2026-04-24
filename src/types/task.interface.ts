@@ -14,6 +14,8 @@ export interface ITask {
   updatedAt: Date;
   startedAt?: Date; // Date when it was set to in progress
   completedAt?: Date; // Date when it was set to done
+  timeSpent: number; // Accumulated time in milliseconds
+  lastStartedAt?: Date; // Date when the current session began
 }
 export enum TaskStatus {
   Pending = "pending",
@@ -41,4 +43,6 @@ export interface IUpdateTask {
   dueDate?: Date;
   completed?: boolean;
   status?: TaskStatus;
+  startedAt?: Date;
+  completedAt?: Date;
 }
