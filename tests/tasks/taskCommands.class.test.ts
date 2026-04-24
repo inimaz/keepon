@@ -37,7 +37,7 @@ describe('TaskCommands', () => {
   describe('createTask', () => {
     it('should create a task and call render.successCreate', async () => {
       const taskData = { title: 'New Task', importance: 1, urgency: 1, estimatedTime: 1 };
-      const createdTask = { _id: '1', ...taskData };
+      const createdTask = { externalId: 1, ...taskData };
       mockTaskApi.create.mockResolvedValue(createdTask);
 
       await taskCommands.createTask(taskData as any);
@@ -47,8 +47,8 @@ describe('TaskCommands', () => {
     });
     describe('createTask with CLI positional arguments', () => {
       it('should correctly parse positional args from k create "test" "" 5 10 45', async () => {
-        const createdTask = { _id: '1', title: 'test', estimatedTime: 45, urgency: 5, importance: 10 };
-        mockTaskApi.create.mockResolvedValue(createdTask);
+      const createdTask = { externalId: 1, title: 'test', estimatedTime: 45, urgency: 5, importance: 10 };
+      mockTaskApi.create.mockResolvedValue(createdTask);
 
         // Simulate current CLI handler receiving args from commander
         const [title, posDescription, posUrgency, posImportance, posEstimatedTime] =
@@ -83,7 +83,7 @@ describe('TaskCommands', () => {
 
   describe('getTask', () => {
     it('should get a task and call render.successGet', async () => {
-      const task = { _id: '1', title: 'Task 1' };
+      const task = { externalId: 1, title: 'Task 1' };
       mockTaskApi.get.mockResolvedValue(task);
 
       await taskCommands.getTask('1');
@@ -96,7 +96,7 @@ describe('TaskCommands', () => {
   describe('updateTask', () => {
     it('should update a task and call render.successEdit', async () => {
       const updateData = { title: 'Updated Task' };
-      const updatedTask = { _id: '1', ...updateData };
+      const updatedTask = { externalId: 1, ...updateData };
       mockTaskApi.update.mockResolvedValue(updatedTask);
 
       await taskCommands.updateTask('1', updateData as any);
@@ -108,7 +108,7 @@ describe('TaskCommands', () => {
 
   describe('setStatusInProgress', () => {
     it('should set task status to InProgress and call render.successEdit', async () => {
-      const updatedTask = { _id: '1', status: TaskStatus.InProgress };
+      const updatedTask = { externalId: 1, status: TaskStatus.InProgress };
       mockTaskApi.update.mockResolvedValue(updatedTask);
 
       await taskCommands.setStatusInProgress('1');
@@ -123,9 +123,9 @@ describe('TaskCommands', () => {
 
   describe('checkStatus', () => {
     it('should toggle status from Done to Pending', async () => {
-      const task = { _id: '1', status: TaskStatus.Done };
+      const task = { externalId: 1, status: TaskStatus.Done };
       mockTaskApi.get.mockResolvedValue(task);
-      mockTaskApi.update.mockResolvedValue({ _id: '1', status: TaskStatus.Pending });
+      mockTaskApi.update.mockResolvedValue({ externalId: 1, status: TaskStatus.Pending });
 
       await taskCommands.checkStatus('1');
 
@@ -137,9 +137,9 @@ describe('TaskCommands', () => {
     });
 
     it('should toggle status from Pending to Done', async () => {
-      const task = { _id: '1', status: TaskStatus.Pending };
+      const task = { externalId: 1, status: TaskStatus.Pending };
       mockTaskApi.get.mockResolvedValue(task);
-      mockTaskApi.update.mockResolvedValue({ _id: '1', status: TaskStatus.Done });
+      mockTaskApi.update.mockResolvedValue({ externalId: 1, status: TaskStatus.Done });
 
       await taskCommands.checkStatus('1');
 
@@ -153,7 +153,7 @@ describe('TaskCommands', () => {
 
   describe('showTasksDashboard', () => {
     it('should show tasks dashboard with default params and call render.displayTaskDashboard', async () => {
-      const tasks = { data: [{ _id: '1', title: 'Task 1' }] };
+      const tasks = { data: [{ externalId: 1, title: 'Task 1' }] };
       mockTaskApi.getAll.mockResolvedValue(tasks);
 
       await taskCommands.showTasksDashboard();
@@ -163,7 +163,7 @@ describe('TaskCommands', () => {
     });
 
     it('should show tasks dashboard with filter when hideBlockedTasks is true', async () => {
-      const tasks = { data: [{ _id: '1', title: 'Task 1' }] };
+      const tasks = { data: [{ externalId: 1, title: 'Task 1' }] };
       mockTaskApi.getAll.mockResolvedValue(tasks);
 
       await taskCommands.showTasksDashboard(true);
@@ -177,7 +177,7 @@ describe('TaskCommands', () => {
 
   describe('setStatusBlocked', () => {
     it('should set task status to Blocked and call render.successEdit', async () => {
-      const updatedTask = { _id: '1', status: TaskStatus.Blocked };
+      const updatedTask = { externalId: 1, status: TaskStatus.Blocked };
       mockTaskApi.update.mockResolvedValue(updatedTask);
 
       await taskCommands.setStatusBlocked('1');
@@ -186,6 +186,57 @@ describe('TaskCommands', () => {
         status: TaskStatus.Blocked,
       });
       expect(render.successEdit).toHaveBeenCalledWith('1');
+    });
+  });
+
+  describe('deleteTask', () => {
+    it('should delete a task and call render.successDelete', async () => {
+      mockTaskApi.delete.mockResolvedValue(undefined);
+
+      await taskCommands.deleteTask('1');
+
+      expect(mockTaskApi.delete).toHaveBeenCalledWith('1');
+      expect(render.successDelete).toHaveBeenCalledWith('1');
+    });
+  });
+
+  describe('showAgendaDashboard', () => {
+    it('should show agenda dashboard and call render.displayAgendaDashboard', async () => {
+      const tasks = { data: [{ externalId: 1, title: 'Task 1' }] };
+      mockTaskApi.getAll.mockResolvedValue(tasks);
+
+      await taskCommands.showAgendaDashboard();
+
+      expect(mockTaskApi.getAll).toHaveBeenCalledWith({
+        statusExcludeFilter: [TaskStatus.Blocked, TaskStatus.Done],
+      });
+      expect(render.displayAgendaDashboard).toHaveBeenCalledWith(tasks.data);
+    });
+  });
+
+  describe('clearCompletedTasks', () => {
+    it('should move completed tasks to archive', async () => {
+      const doneTask = { _id: '1', title: 'Done Task', status: TaskStatus.Pending, externalId: 1 };
+      const completedTask = { _id: '2', title: 'Completed', status: TaskStatus.Done, externalId: 2 };
+      mockTaskApi.getAll.mockResolvedValue({ data: [doneTask, completedTask] });
+
+      await taskCommands.clearCompletedTasks();
+
+      expect(taskCommands.archivedb.data.tasks).toContain(completedTask);
+    });
+  });
+
+  describe('reindexTasks', () => {
+    it('should reassign sequential externalIds', async () => {
+      const task1 = { _id: 'uuid-1', externalId: 10 };
+      const task2 = { _id: 'uuid-2', externalId: 20 };
+      mockTaskApi.getAll.mockResolvedValue({ data: [task1, task2] });
+
+      await taskCommands.reindexTasks();
+
+      expect(task1.externalId).toBe(1);
+      expect(task2.externalId).toBe(2);
+      expect(taskCommands.db.data.lastTaskId).toBe(2);
     });
   });
 });

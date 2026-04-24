@@ -27,10 +27,10 @@ class Render {
     };
     return log(titleObj);
   }
-  _buildPrefix(item: { _id: string; [key: string]: any }) {
+  _buildPrefix(item: { externalId: number; [key: string]: any }) {
     const prefix = [];
 
-    const { _id: id } = item;
+    const { externalId: id } = item;
     prefix.push(" ".repeat(4 - String(id).length));
     prefix.push(grey(`${id}.`));
 
@@ -194,7 +194,7 @@ class Render {
     success({ prefix, message, suffix });
   }
   successGet(task: ITask) {
-    const [prefix, suffix] = ["\n", `${grey(task._id)}\n`];
+    const [prefix, suffix] = ["\n", `${grey(task.externalId)}\n`];
     const message = "Get task:";
     log({ prefix, message, suffix });
     log(grey(JSON.stringify(task, null, 4)));

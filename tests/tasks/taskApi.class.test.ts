@@ -11,7 +11,8 @@ describe('TaskApi', () => {
       data: {
         tasks: [
           {
-            _id: '1',
+            _id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+            externalId: 1,
             title: 'Task 1',
             importance: 3,
             urgency: 3,
@@ -22,7 +23,8 @@ describe('TaskApi', () => {
             labels: []
           },
           {
-            _id: '2',
+            _id: 'b2c3d4e5-f6a7-8901-bcde-f12345678901',
+            externalId: 2,
             title: 'Task 2',
             importance: 1,
             urgency: 1,
@@ -41,9 +43,10 @@ describe('TaskApi', () => {
   });
 
   describe('get', () => {
-    it('should return a task by id', async () => {
+    it('should return a task by externalId', async () => {
       const task = await taskApi.get('1');
-      expect(task._id).toBe('1');
+      expect(task._id).toBe('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+      expect(task.externalId).toBe(1);
       expect(task.title).toBe('Task 1');
     });
 
@@ -60,18 +63,56 @@ describe('TaskApi', () => {
 
     it('should apply limit and offset', async () => {
       const result = await taskApi.getAll({ limit: 1, offset: 1 });
-      expect(result.data[0]._id).toBe('2');
+      expect(result.data[0].externalId).toBe(2);
     });
 
     it('should apply sorting', async () => {
       const result = await taskApi.getAll({ sort: 'importance' as any, order: 'asc' });
-      expect(result.data[0]._id).toBe('2');
+      expect(result.data[0].externalId).toBe(2);
     });
 
     it('should apply filtering by statusExcludeFilter', async () => {
       const result = await taskApi.getAll({ statusExcludeFilter: [TaskStatus.Done] });
       expect(result.data.length).toBe(1);
-      expect(result.data[0]._id).toBe('1');
+      expect(result.data[0].externalId).toBe(1);
+    });
+
+    it('should exclude blocked tasks when hideBlockedTasks is true', async () => {
+      mockDb.data = {
+        tasks: [
+          {
+            _id: 'c3d4e5f6-a7b8-9012-cdef-123456789012',
+            externalId: 1,
+            title: 'Task 1',
+            importance: 5,
+            urgency: 5,
+            estimatedTime: 1,
+            status: TaskStatus.Pending,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            labels: [],
+            timeSpent: 0,
+          },
+          {
+            _id: 'd4e5f6a7-b8c9-0123-defa-234567890123',
+            externalId: 2,
+            title: 'Task 2',
+            importance: 1,
+            urgency: 1,
+            estimatedTime: 1,
+            status: TaskStatus.Blocked,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            labels: [],
+            timeSpent: 0,
+          },
+        ],
+        lastTaskId: 2,
+      };
+      taskApi = new TaskApi(mockDb);
+      const result = await taskApi.getAll({ hideBlockedTasks: true });
+      expect(result.data.length).toBe(1);
+      expect(result.data[0].externalId).toBe(1);
     });
   });
 
@@ -85,7 +126,7 @@ describe('TaskApi', () => {
         labels: ['label1']
       };
        const task = await taskApi.create(newTaskData as any);
-      expect(task._id).toBe('3');
+      expect(task.externalId).toBe(3);
       expect(task.title).toBe('New Task');
       expect(task.status).toBe(TaskStatus.Pending);
       expect(mockDb.data.lastTaskId).toBe(3);
@@ -128,7 +169,8 @@ describe('TaskApi', () => {
       mockDb.data = {
         tasks: [
           {
-            _id: '1',
+            _id: '12345678-1234-5678-1234-567812345678',
+            externalId: 1,
             title: 'Task with time tracking',
             importance: 3,
             urgency: 3,
