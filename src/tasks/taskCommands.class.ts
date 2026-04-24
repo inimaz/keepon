@@ -46,7 +46,7 @@ export default class TaskCommands {
   async createTask(task: ICreateTask): Promise<void> {
     const taskCreated = await this.taskAPi.create(task);
 
-    render.successCreate(taskCreated._id);
+    render.successCreate(String(taskCreated.externalId));
   }
   async getTask(id: string): Promise<void> {
     const task = await this.taskAPi.get(id);
@@ -56,20 +56,20 @@ export default class TaskCommands {
   async updateTask(id: string, data: IUpdateTask): Promise<void> {
     const task = await this.taskAPi.update(id, data);
 
-    render.successEdit(task._id);
+    render.successEdit(String(task.externalId));
   }
   async setStatusInProgress(id: string) {
     const task = await this.taskAPi.update(id, {
       status: TaskStatus.InProgress,
       startedAt: new Date(),
     });
-    render.successEdit(task._id);
+    render.successEdit(String(task.externalId));
   }
   async setStatusBlocked(id: string) {
     const task = await this.taskAPi.update(id, {
       status: TaskStatus.Blocked,
     });
-    render.successEdit(task._id);
+    render.successEdit(String(task.externalId));
   }
   /**
    *
@@ -86,19 +86,18 @@ export default class TaskCommands {
     const task = await this.taskAPi.update(id, {
       status,
     });
-    render.successEdit(task._id);
+    render.successEdit(String(task.externalId));
   }
   /**
    * Archive all tasks that have been completed
    */
   async clearCompletedTasks() {
-    // Get all tasks
     const tasks = await this.taskAPi.getAll();
     tasks.data.forEach(async (task: ITask) => {
       if (task.status === TaskStatus.Done) {
         this.archivedb.data.tasks.push(task);
         this.db.data.tasks.splice(
-          this.db.data.tasks.findIndex((t: ITask) => t._id === task._id),
+          this.db.data.tasks.findIndex((t: ITask) => t.externalId === task.externalId),
           1
         );
       }
@@ -114,11 +113,10 @@ export default class TaskCommands {
     const tasks = await this.taskAPi.getAll();
     let newId = 1;
     tasks.data.forEach(async (task: ITask) => {
-      task._id = `${newId}`;
+      task.externalId = newId;
       newId += 1;
     });
-    // Update the lastTaskId so new tasks use lastTaskId +1 ...
-    this.db.data.lastTaskId = newId;
+    this.db.data.lastTaskId = newId - 1;
     await this.db.write();
   }
 

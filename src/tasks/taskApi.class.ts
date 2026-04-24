@@ -8,13 +8,43 @@ import {
 
 export class TaskApi {
   db: any;
+
   constructor(db) {
     this.db = db;
+    this.ensureExternalIds();
   }
-  _getById(tasks: ITask[], id: string): ITask {
-    const task = tasks.find((task) => task._id === id);
+  ensureExternalIds() {
+    const tasks = this.getTasks();
+    if (tasks.length === 0) return;
+    let nextId: number = tasks[0].externalId || 0;
+    tasks.forEach((task: ITask) => {
+      if (task.externalId === undefined || task.externalId === null) {
+        nextId += 1;
+        task.externalId = nextId;
+        this.db.data.lastTaskId = nextId;
+      } else {
+        nextId = task.externalId;
+      }
+    });
+  }
+  getTasks(): ITask[] {
+    return this.db.data.tasks;
+  }
+  _getByExternalId(tasks: ITask[], externalId: number): ITask {
+    const task = tasks.find((task) => task.externalId === externalId);
     if (task === undefined) throw new Error("Task not found");
     return task;
+  }
+  _getById(tasks: ITask[], id: string): ITask {
+    const externalId = this.parseExternalId(id);
+    return this._getByExternalId(tasks, externalId);
+  }
+  parseExternalId(id: string): number {
+    const parsed = parseInt(id, 10);
+    if (isNaN(parsed) || parsed <= 0) {
+      throw new Error("Invalid task ID: must be a positive integer");
+    }
+    return parsed;
   }
   async get(id: string): Promise<ITask> {
     const tasks = await this.db.data.tasks;
@@ -60,14 +90,13 @@ export class TaskApi {
     };
   }
   async create(data: ICreateTask): Promise<ITask> {
-    const tasks = await this.db.data.tasks;
+    const tasks: ITask[] = await this.getTasks();
     const now = new Date();
-    const id = `${
-      this.db.data.lastTaskId !== undefined ? this.db.data.lastTaskId + 1 : 1
-    }`;
+    const externalId = this.db.data.lastTaskId + 1;
     const task: ITask = {
       ...data,
-      _id: id,
+      _id: crypto.randomUUID(),
+      externalId,
       priority: calculatePriority(data),
       createdAt: now,
       updatedAt: now,
@@ -76,7 +105,7 @@ export class TaskApi {
       timeSpent: 0,
     };
     tasks.push(task);
-    this.db.data.lastTaskId = parseInt(id);
+    this.db.data.lastTaskId = externalId;
     await this.db.write();
     return task;
   }
@@ -118,7 +147,7 @@ export class TaskApi {
     // Recalculate priority
     task = { ...task, priority: calculatePriority(task as any) };
     // Update the task in the array
-    const index = tasks.findIndex((t: ITask) => t._id === id);
+    const index = tasks.findIndex((t: ITask) => t.externalId === task.externalId);
     if (index !== -1) {
       tasks[index] = task;
     }
@@ -127,8 +156,9 @@ export class TaskApi {
     return task;
   }
   async delete(id: string): Promise<void> {
+    const externalId = this.parseExternalId(id);
     const tasks = await this.db.data.tasks;
-    const index = tasks.findIndex((task: ITask) => task._id === id);
+    const index = tasks.findIndex((task: ITask) => task.externalId === externalId);
     if (index === -1) {
       throw new Error("Task not found");
     }
