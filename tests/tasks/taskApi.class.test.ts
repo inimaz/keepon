@@ -278,6 +278,106 @@ describe('TaskApi', () => {
       expect(task.timeSpent).toBe(0);
       expect(task.title).toBe('Updated Title');
     });
+    it('should stop an InProgress task when another task starts as InProgress', async () => {
+      // Setup: Task 1 is InProgress
+      mockDb.data.tasks[0].status = TaskStatus.InProgress;
+      mockDb.data.tasks[0].lastStartedAt = new Date(new Date().getTime() - 60000); // 60s ago
+      mockDb.data.tasks[0].timeSpent = 0;
+      
+      // Setup: Task 2 is Pending
+      mockDb.data.tasks[1] = {
+        _id: 'task-2-id',
+        externalId: 2,
+        title: 'Task 2',
+        importance: 3,
+        urgency: 3,
+        estimatedTime: 10,
+        status: TaskStatus.Pending,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        labels: [],
+        timeSpent: 0,
+      };
+
+      // Action: Start Task 2
+      await taskApi.update('2', { ...taskDto({ status: TaskStatus.InProgress }) });
+
+      // Assertions
+      const task1 = await taskApi.get('1');
+      const task2 = await taskApi.get('2');
+
+      // Task 1 should have stopped and accumulated time
+      expect(task1.status).toBe(TaskStatus.Pending);
+      expect(task1.timeSpent).toBeGreaterThan(55000);
+      expect(task1.lastStartedAt).toBeUndefined();
+
+      // Task 2 should now be InProgress
+      expect(task2.status).toBe(TaskStatus.InProgress);
+      expect(task2.lastStartedAt).toBeInstanceOf(Date);
+    });
+
+    it('should not stop the same task when starting it', async () => {
+      // Setup: Task 1 is InProgress
+      mockDb.data.tasks[0].status = TaskStatus.InProgress;
+      mockDb.data.tasks[0].lastStartedAt = new Date(new Date().getTime() - 60000); // 60s ago
+      mockDb.data.tasks[0].timeSpent = 5000;
+
+      // Action: Start Task 1 again (redundant)
+      await taskApi.update('1', { ...taskDto({ status: TaskStatus.InProgress }) });
+
+      const task1 = await taskApi.get('1');
+      expect(task1.status).toBe(TaskStatus.InProgress);
+      expect(task1.timeSpent).toBe(5000); // Should not have changed
+    });
+
+    it('should stop an InProgress task when another starts, even when lastStartedAt is a string (loaded from disk)', async () => {
+      // Setup: Task 1 is InProgress with lastStartedAt as ISO string (simulating read from JSON)
+      const dateStr = new Date(new Date().getTime() - 60000).toISOString();
+      mockDb.data.tasks[0].status = TaskStatus.InProgress;
+      mockDb.data.tasks[0].lastStartedAt = dateStr as any; // String instead of Date
+      mockDb.data.tasks[0].timeSpent = 0;
+
+      // Setup: Task 2 is Pending
+      mockDb.data.tasks[1] = {
+        _id: 'task-2-id',
+        externalId: 2,
+        title: 'Task 2',
+        importance: 3,
+        urgency: 3,
+        estimatedTime: 10,
+        status: TaskStatus.Pending,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        labels: [],
+        timeSpent: 0,
+      };
+
+      // Action: Start Task 2
+      await taskApi.update('2', { ...taskDto({ status: TaskStatus.InProgress }) });
+
+      // Assertions
+      const task1 = await taskApi.get('1');
+      expect(task1.status).toBe(TaskStatus.Pending);
+      expect(task1.timeSpent).toBeGreaterThan(55000);
+      expect(task1.lastStartedAt).toBeUndefined();
+    });
+
+    it('should accumulate time when moving away from InProgress, even when lastStartedAt is a string', async () => {
+      // Setup: Task is InProgress with lastStartedAt as ISO string
+      const dateStr = new Date(new Date().getTime() - 120000).toISOString();
+      mockDb.data.tasks[0].status = TaskStatus.InProgress;
+      mockDb.data.tasks[0].lastStartedAt = dateStr as any;
+      mockDb.data.tasks[0].timeSpent = 0;
+
+      // Action: Move to Pending
+      const updatedTask = await taskApi.update('1', { ...taskDto({ status: TaskStatus.Pending }) });
+
+      // Should have accumulated ~120s without crashing
+      expect(updatedTask.timeSpent).toBeGreaterThan(118000);
+      expect(updatedTask.timeSpent).toBeLessThan(122000);
+      expect(updatedTask.lastStartedAt).toBeUndefined();
+    });
+    
   });
 });
 
