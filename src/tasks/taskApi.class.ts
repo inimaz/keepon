@@ -119,6 +119,19 @@ export class TaskApi {
     // Initialize timeSpent if it doesn't exist (for older tasks)
     if (task.timeSpent === undefined) task.timeSpent = 0;
 
+    // Auto-stop other tasks when starting a new one
+    if (newStatus === TaskStatus.InProgress) {
+      for (const t of tasks) {
+        if (t.status === TaskStatus.InProgress && t.externalId !== task.externalId && t.lastStartedAt) {
+          const started = new Date(t.lastStartedAt);
+          const duration = currentDate.getTime() - started.getTime();
+          t.timeSpent += duration;
+          t.lastStartedAt = undefined;
+          t.status = TaskStatus.Pending;
+        }
+      }
+    }
+
     // Handle status transitions for time tracking
     if (newStatus !== undefined && newStatus !== oldStatus) {
       if (newStatus === TaskStatus.InProgress) {
@@ -127,7 +140,8 @@ export class TaskApi {
       } else {
         // Moving away from InProgress (to Done, Blocked, or Pending)
         if (oldStatus === TaskStatus.InProgress && task.lastStartedAt) {
-          const duration = currentDate.getTime() - task.lastStartedAt.getTime();
+          const started = new Date(task.lastStartedAt);
+          const duration = currentDate.getTime() - started.getTime();
           task.timeSpent += duration;
           task.lastStartedAt = undefined;
         }
