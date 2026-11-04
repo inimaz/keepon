@@ -69,4 +69,21 @@ describe("Render", () => {
       })
     );
   });
+
+  it("formatNow shows current task with total time, else next, else nothing", () => {
+    const current = {
+      title: "Write report",
+      timeSpent: 60 * 60000,
+      lastStartedAt: new Date(Date.now() - 5 * 60000),
+      estimatedTime: 90,
+    } as any;
+    expect(render.formatNow(current)).toBe("▶ Write report · 1h 5m / 1h 30m");
+    expect(render.formatNow({ ...current, estimatedTime: 30 })).toBe(
+      "▶ Write report · 1h 5m / 30m ⚠ over"
+    );
+    expect(render.formatNow(undefined, { title: "Email", externalId: 3 } as any)).toBe(
+      "Next: Email (k start 3)"
+    );
+    expect(render.formatNow()).toBe("Nothing to do");
+  });
 });

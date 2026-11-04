@@ -132,6 +132,17 @@ export default class TaskCommands {
     // Render the response
     render.displayAgendaDashboard(tasks.data);
   }
+  /**
+   * Show the task in progress, or the next one to start
+   */
+  async showNow(): Promise<void> {
+    const { data } = await this.taskAPi.getAll({
+      statusExcludeFilter: [TaskStatus.Blocked, TaskStatus.Done],
+      limit: Infinity, // the task in progress may rank below the first page
+    });
+    const current = data.find((t) => t.status === TaskStatus.InProgress);
+    render.displayNow(current, current ? undefined : data[0]);
+  }
   async deleteTask(id: string): Promise<void> {
     await this.taskAPi.delete(id);
     render.successDelete(id);
