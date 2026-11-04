@@ -154,6 +154,14 @@ program
   });
 
 program
+  .command("now")
+  .description("Show the task in progress, or the next one to start")
+  .action(async () => {
+    await taskCommands.setUpConfig();
+    await taskCommands.showNow();
+  });
+
+program
   .command("reindex")
   .description("Reindex tasks so that their IDs go from 1 to N")
   .action(async () => {

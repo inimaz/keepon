@@ -182,6 +182,23 @@ class Render {
     });
     agendaRows.forEach((row) => log(row));
   }
+  // Plain text, no colors: consumed by the desktop widget
+  formatNow(current?: ITask, next?: ITask): string {
+    if (current) {
+      const session = current.lastStartedAt
+        ? Date.now() - new Date(current.lastStartedAt).getTime()
+        : 0;
+      const mins = Math.floor((current.timeSpent + session) / 60000);
+      const fmt = (m: number) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`);
+      const over = mins > current.estimatedTime ? " ⚠ over" : "";
+      return `▶ ${current.title} · ${fmt(mins)} / ${fmt(current.estimatedTime)}${over}`;
+    }
+    if (next) return `Next: ${next.title} (k start ${next.externalId})`;
+    return "Nothing to do";
+  }
+  displayNow(current?: ITask, next?: ITask) {
+    console.log(this.formatNow(current, next));
+  }
   successCreate(id) {
     const [prefix, suffix] = ["\n", grey(id)];
     const message = "Created task:";
