@@ -11,9 +11,9 @@
     "k": "./lib/index.js"
   },
   "scripts": {
-    "build": "npx tsc",
-    "test": "npx vitest run",
-    "test:coverage": "npx vitest run --coverage  --coverage.include \"src/**/*.ts\""
+    "build": "tsc",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage --coverage.include \"src/**/*.ts\""
   },
   "keywords": [
     "time-management",
@@ -23,7 +23,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/figlet": "^1.5.8",
-    "@types/node": "^20.12.2",
+    "@types/node": "^24.19.2",
     "@vitest/coverage-v8": "^4.1.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3",
@@ -36,5 +36,6 @@
     "lowdb": "^7.0.1",
     "signale": "^1.4.0"
   },
-  "types": "lib/"
+  "types": "lib/",
+  "packageManager": "pnpm@10.8.0"
 }
