@@ -6,6 +6,7 @@ import {
   IUpdateTask,
   TaskStatus,
 } from "../types/task.interface.js";
+import { IParams } from "../types/queryParams.interface.js";
 import render from "../render/index.js";
 import fs from "fs";
 import os from "os";
@@ -32,10 +33,13 @@ export default class TaskCommands {
     this.taskAPi = new TaskApi(this.db);
   }
 
-  async showTasksDashboard(hideBlockedTasks: boolean = false): Promise<void> {
-    let query = {};
+  async showTasksDashboard(
+    hideBlockedTasks: boolean = false,
+    showAll: boolean = false
+  ): Promise<void> {
+    let query: IParams = { limit: showAll ? Infinity : 10 };
     if (hideBlockedTasks) {
-      query = { statusExcludeFilter: [TaskStatus.Blocked] };
+      query = { ...query, statusExcludeFilter: [TaskStatus.Blocked] };
     }
     // Get all tasks
     const tasks = await this.taskAPi.getAll(query);
@@ -92,16 +96,12 @@ export default class TaskCommands {
    * Archive all tasks that have been completed
    */
   async clearCompletedTasks() {
-    const tasks = await this.taskAPi.getAll();
-    tasks.data.forEach(async (task: ITask) => {
-      if (task.status === TaskStatus.Done) {
-        this.archivedb.data.tasks.push(task);
-        this.db.data.tasks.splice(
-          this.db.data.tasks.findIndex((t: ITask) => t.externalId === task.externalId),
-          1
-        );
-      }
-    });
+    const tasks = await this.taskAPi.getAll({ limit: Infinity });
+    const completed = tasks.data.filter((task: ITask) => task.status === TaskStatus.Done);
+    this.archivedb.data.tasks.push(...completed);
+    this.db.data.tasks = this.db.data.tasks.filter(
+      (task: ITask) => task.status !== TaskStatus.Done
+    );
     await this.db.write();
     await this.archivedb.write();
   }
@@ -110,7 +110,7 @@ export default class TaskCommands {
    */
   async reindexTasks() {
     // Get all tasks
-    const tasks = await this.taskAPi.getAll();
+    const tasks = await this.taskAPi.getAll({ limit: Infinity });
     let newId = 1;
     tasks.data.forEach(async (task: ITask) => {
       task.externalId = newId;
@@ -127,6 +127,7 @@ export default class TaskCommands {
     // Get all tasks
     const tasks = await this.taskAPi.getAll({
       statusExcludeFilter: [TaskStatus.Blocked, TaskStatus.Done],
+      limit: Infinity,
     });
 
     // Render the response

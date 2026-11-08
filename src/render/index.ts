@@ -127,7 +127,11 @@ class Render {
         : pending(msgObj);
     });
     // The footer of the dashboard
-    log(grey(`\n${data.length} of ${total} tasks. Offset: ${offset}`));
+    if (data.length < total) {
+      log(grey(`\n${data.length} of ${total} tasks. Run k show --all to see all of them.`));
+    } else {
+      log(grey(`\n${total} ${total === 1 ? "task" : "tasks"}`));
+    }
   }
   displayAgendaDashboard(tasks: ITask[]) {
     // Show a line with the day of the week + day of the month

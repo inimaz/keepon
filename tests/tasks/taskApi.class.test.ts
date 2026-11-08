@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { TaskApi } from '../../src/tasks/taskApi.class.js';
+import { parseMinutes, parseRating, TaskApi } from '../../src/tasks/taskApi.class.js';
 import { TaskStatus } from '../../src/types/task.interface.js';
 
 describe('TaskApi', () => {
@@ -51,7 +51,13 @@ describe('TaskApi', () => {
     });
 
     it('should throw error if task not found', async () => {
-      await expect(taskApi.get('3')).rejects.toThrow('Task not found');
+      await expect(taskApi.get('3')).rejects.toThrow('No task');
+    });
+  });
+
+  describe('parseExternalId', () => {
+    it.each(['abc', '3abc', '0', '-1'])('should reject %s', (id) => {
+      expect(() => taskApi.parseExternalId(id)).toThrow(`"${id}" isn't a task ID`);
     });
   });
 
@@ -132,6 +138,23 @@ describe('TaskApi', () => {
       expect(mockDb.data.lastTaskId).toBe(3);
       expect(mockDb.write).toHaveBeenCalled();
     });
+
+    const taskData = { title: 'New Task', importance: 2, urgency: 2, estimatedTime: 2 };
+
+    it('should give the first task of a fresh file ID 1', async () => {
+      const task = await new TaskApi({
+        data: { tasks: [] },
+        write: vi.fn().mockResolvedValue(undefined),
+      }).create(taskData as any);
+      expect(task.externalId).toBe(1);
+    });
+
+    it('should not reuse an ID when lastTaskId is missing or too low', async () => {
+      mockDb.data.lastTaskId = 1;
+      expect((await taskApi.create(taskData as any)).externalId).toBe(3);
+      delete mockDb.data.lastTaskId;
+      expect((await taskApi.create(taskData as any)).externalId).toBe(4);
+    });
   });
 
   describe('update', () => {
@@ -154,13 +177,14 @@ describe('TaskApi', () => {
 
   describe('delete', () => {
     it('should delete a task', async () => {
-      await taskApi.delete('1');
+      const deleted = await taskApi.delete('1');
+      expect(deleted.title).toBe('Task 1');
       expect(mockDb.data.tasks.length).toBe(1);
       expect(mockDb.write).toHaveBeenCalled();
     });
 
     it('should throw error if task not found', async () => {
-      await expect(taskApi.delete('99')).rejects.toThrow('Task not found');
+      await expect(taskApi.delete('99')).rejects.toThrow('No task');
     });
   });
 
@@ -390,3 +414,26 @@ function taskDto(data: any) {
     ...data
   };
 }
+
+describe('parseRating', () => {
+  it('should accept whole numbers from 1 to 10', () => {
+    expect(parseRating('Urgency', '1')).toBe(1);
+    expect(parseRating('Urgency', '10')).toBe(10);
+  });
+
+  it.each(['0', '11', '99', 'high', '5.5', ''])('should reject "%s"', (value) => {
+    expect(() => parseRating('Urgency', value)).toThrow(
+      `Urgency must be a whole number from 1 to 10 (got "${value}").`
+    );
+  });
+});
+
+describe('parseMinutes', () => {
+  it('should accept whole minutes', () => {
+    expect(parseMinutes('45')).toBe(45);
+  });
+
+  it.each(['0', '-5', 'soon'])('should reject "%s"', (value) => {
+    expect(() => parseMinutes(value)).toThrow('Estimated time must be');
+  });
+});

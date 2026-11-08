@@ -48,6 +48,18 @@ describe("Render", () => {
     );
   });
 
+  it("should point to k show --all when the dashboard leaves tasks out", () => {
+    render.displayTaskDashboard({ data: [], total: 15, limit: 10, offset: 0 });
+    expect(signale.log).toHaveBeenCalledWith(
+      "\n0 of 15 tasks. Run k show --all to see all of them."
+    );
+  });
+
+  it("should show only the total when every task is shown", () => {
+    render.displayTaskDashboard({ data: [], total: 0, limit: 10, offset: 0 });
+    expect(signale.log).toHaveBeenCalledWith("\n0 tasks");
+  });
+
   it("should call successEdit with correct parameters", () => {
     const id = "123";
     render.successEdit(id);

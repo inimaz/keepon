@@ -32,7 +32,7 @@ export class TaskApi {
   }
   _getByExternalId(tasks: ITask[], externalId: number): ITask {
     const task = tasks.find((task) => task.externalId === externalId);
-    if (task === undefined) throw new Error("Task not found");
+    if (task === undefined) throw new Error(taskNotFoundMessage(externalId));
     return task;
   }
   _getById(tasks: ITask[], id: string): ITask {
@@ -40,9 +40,9 @@ export class TaskApi {
     return this._getByExternalId(tasks, externalId);
   }
   parseExternalId(id: string): number {
-    const parsed = parseInt(id, 10);
-    if (isNaN(parsed) || parsed <= 0) {
-      throw new Error("Invalid task ID: must be a positive integer");
+    const parsed = /^\d+$/.test(id) ? parseInt(id, 10) : 0;
+    if (parsed <= 0) {
+      throw new Error(`"${id}" isn't a task ID. Run k to see your tasks and their IDs.`);
     }
     return parsed;
   }
@@ -92,7 +92,9 @@ export class TaskApi {
   async create(data: ICreateTask): Promise<ITask> {
     const tasks: ITask[] = await this.getTasks();
     const now = new Date();
-    const externalId = this.db.data.lastTaskId + 1;
+    // Older files may have a missing or too low lastTaskId: never reuse an ID in use
+    const externalId =
+      Math.max(this.db.data.lastTaskId ?? 0, ...tasks.map((t) => t.externalId ?? 0)) + 1;
     const task: ITask = {
       ...data,
       _id: crypto.randomUUID(),
@@ -169,17 +171,43 @@ export class TaskApi {
     await this.db.write();
     return task;
   }
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<ITask> {
     const externalId = this.parseExternalId(id);
     const tasks = await this.db.data.tasks;
     const index = tasks.findIndex((task: ITask) => task.externalId === externalId);
     if (index === -1) {
-      throw new Error("Task not found");
+      throw new Error(taskNotFoundMessage(externalId));
     }
-    tasks.splice(index, 1);
+    const [deleted] = tasks.splice(index, 1);
     await this.db.write();
+    return deleted;
   }
 }
+
+const taskNotFoundMessage = (externalId: number): string =>
+  `No task ${externalId}. Run k to see your tasks.`;
+
+/**
+ * Parse a 1-10 rating (urgency or importance) typed by the user
+ */
+export const parseRating = (name: string, value: string): number => {
+  const rating = /^\d+$/.test(value) ? parseInt(value, 10) : NaN;
+  if (!(rating >= 1 && rating <= 10)) {
+    throw new Error(`${name} must be a whole number from 1 to 10 (got "${value}").`);
+  }
+  return rating;
+};
+
+/**
+ * Parse an estimated time in minutes typed by the user
+ */
+export const parseMinutes = (value: string): number => {
+  const minutes = /^\d+$/.test(value) ? parseInt(value, 10) : 0;
+  if (minutes < 1) {
+    throw new Error(`Estimated time must be a whole number of minutes, 1 or more (got "${value}").`);
+  }
+  return minutes;
+};
 
 /**
  * Calculate the priority of a task based on the importance, urgency and estimated time
