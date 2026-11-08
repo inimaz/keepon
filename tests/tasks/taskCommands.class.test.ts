@@ -32,6 +32,8 @@ describe('TaskCommands', () => {
     
     mockTaskApi = vi.mocked(TaskApi.prototype);
     taskCommands.taskAPi = new TaskApi(taskCommands.db) as any;
+    mockTaskApi.getTasks.mockReturnValue([]);
+    mockTaskApi.getAll.mockResolvedValue({ data: [] });
   });
 
   describe('createTask', () => {
@@ -125,7 +127,8 @@ describe('TaskCommands', () => {
     it('should toggle status from Done to Pending', async () => {
       const task = { externalId: 1, status: TaskStatus.Done };
       mockTaskApi.get.mockResolvedValue(task);
-      mockTaskApi.update.mockResolvedValue({ externalId: 1, status: TaskStatus.Pending });
+      const updatedTask = { externalId: 1, status: TaskStatus.Pending };
+      mockTaskApi.update.mockResolvedValue(updatedTask);
 
       await taskCommands.checkStatus('1');
 
@@ -139,7 +142,8 @@ describe('TaskCommands', () => {
     it('should toggle status from Pending to Done', async () => {
       const task = { externalId: 1, status: TaskStatus.Pending };
       mockTaskApi.get.mockResolvedValue(task);
-      mockTaskApi.update.mockResolvedValue({ externalId: 1, status: TaskStatus.Done });
+      const updatedTask = { externalId: 1, status: TaskStatus.Done };
+      mockTaskApi.update.mockResolvedValue(updatedTask);
 
       await taskCommands.checkStatus('1');
 
@@ -158,7 +162,7 @@ describe('TaskCommands', () => {
 
       await taskCommands.showTasksDashboard();
 
-      expect(mockTaskApi.getAll).toHaveBeenCalledWith({});
+      expect(mockTaskApi.getAll).toHaveBeenCalledWith({ limit: 10 });
       expect(render.displayTaskDashboard).toHaveBeenCalledWith(tasks);
     });
 
@@ -166,9 +170,10 @@ describe('TaskCommands', () => {
       const tasks = { data: [{ externalId: 1, title: 'Task 1' }] };
       mockTaskApi.getAll.mockResolvedValue(tasks);
 
-      await taskCommands.showTasksDashboard(true);
+      await taskCommands.showTasksDashboard(true, true);
 
       expect(mockTaskApi.getAll).toHaveBeenCalledWith({
+        limit: Infinity,
         statusExcludeFilter: [TaskStatus.Blocked],
       });
       expect(render.displayTaskDashboard).toHaveBeenCalledWith(tasks);
@@ -191,7 +196,7 @@ describe('TaskCommands', () => {
 
   describe('deleteTask', () => {
     it('should delete a task and call render.successDelete', async () => {
-      mockTaskApi.delete.mockResolvedValue(undefined);
+      mockTaskApi.delete.mockResolvedValue({ externalId: 1, title: 'Task 1' });
 
       await taskCommands.deleteTask('1');
 
@@ -209,6 +214,7 @@ describe('TaskCommands', () => {
 
       expect(mockTaskApi.getAll).toHaveBeenCalledWith({
         statusExcludeFilter: [TaskStatus.Blocked, TaskStatus.Done],
+        limit: Infinity,
       });
       expect(render.displayAgendaDashboard).toHaveBeenCalledWith(tasks.data);
     });
@@ -222,6 +228,7 @@ describe('TaskCommands', () => {
 
       await taskCommands.clearCompletedTasks();
 
+      expect(mockTaskApi.getAll).toHaveBeenCalledWith({ limit: Infinity });
       expect(taskCommands.archivedb.data.tasks).toContain(completedTask);
     });
   });
@@ -237,6 +244,7 @@ describe('TaskCommands', () => {
       expect(task1.externalId).toBe(1);
       expect(task2.externalId).toBe(2);
       expect(taskCommands.db.data.lastTaskId).toBe(2);
+      expect(mockTaskApi.getAll).toHaveBeenCalledWith({ limit: Infinity });
     });
   });
 });
